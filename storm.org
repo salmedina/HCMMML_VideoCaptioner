@@ -1,0 +1,11 @@
+* Quantitative analysis
+  - What features?
+    - Sentiment Analyzer on text
+      - because we are using only romantic videos
+    - Facial Landmark detectors
+    - Object detector on videos
+      - subsample before passing thru the object detector
+      - eg.
+	- alexnet
+	- vggnet
+	- network and network
