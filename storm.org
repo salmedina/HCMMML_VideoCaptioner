@@ -9,3 +9,12 @@
 	- alexnet
 	- vggnet
 	- network and network
+
+* Resources
+  - http://googleresearch.blogspot.com/2015/11/computer-respond-to-this-email.html
+    - Sequence to sequence learning using neural networks
+* predicted caption should have the same attributes
+  - sentiment
+  - verbs segregation -- ANOVA
+  - adjectives
+  - nouns --objects  
