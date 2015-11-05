@@ -13,6 +13,8 @@
 * Resources
   - http://googleresearch.blogspot.com/2015/11/computer-respond-to-this-email.html
     - Sequence to sequence learning using neural networks
+  - http://www.cise.ufl.edu/~xsong/papers/ChDF.pdf
+  - https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet
 * predicted caption should have the same attributes
   - sentiment
   - verbs segregation -- ANOVA
