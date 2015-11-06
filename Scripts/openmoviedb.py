@@ -19,7 +19,7 @@ def analyze_movie_genre(genreFile):
     pass
 
 def main():
-    movieFile = '/Users/zal/CMU/Fall2015/HCMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/M-VAD/MovieList.txt'
+    movieFile = '/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/M-VAD/MovieList.txt'
     movieList = get_movie_list(movieFile)
     for movieTitle in movieList:
         movieInfo = get_movie_info(movieTitle.strip())
