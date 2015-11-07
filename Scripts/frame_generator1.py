@@ -17,7 +17,8 @@ def video2frames(base_path,path1,path2,out_path):
                 os.makedirs(os.path.join(out_path,path1,file[0:len(file)-4]))
             # start the video 
             video_capture = cv2.VideoCapture(os.path.join(base_path,path1,path2,file))
-            count = 1
+            count = 24
+            num = 1
             # print
             print file
             while True:
@@ -27,10 +28,16 @@ def video2frames(base_path,path1,path2,out_path):
                 #break if there are no more frames
                 if ret == False:
                     break
-                outfile = os.path.join(file[0:len(file)-4], file[0:len(file)-4] + '_%05d' %(count) + '.png')
-                #print os.path.join(out_path,path1[0:len(path1)-4],outfile)
-                cv2.imwrite(os.path.join(out_path,path1,outfile),frame)
+
+                if count == 24 :
+                    outfile = os.path.join(file[0:len(file)-4], file[0:len(file)-4] + '_%05d' %(num) + '.png')
+                    #print os.path.join(out_path,path1[0:len(path1)-4],outfile)
+                    cv2.imwrite(os.path.join(out_path,path1,outfile),frame)
+                    num = num + 1
+                    count = 0
                 count= count + 1
+
+                
 
 
 #defining the basic variables
