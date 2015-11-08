@@ -1,0 +1,17 @@
+test_srt/FRIENDS_WITH_BENEFITS.srt
+test_srt/THE_BOUNTY_HUNTER.srt
+train_srt/BURLESQUE.srt
+train_srt/DEAR_JOHN.srt
+train_srt/EASY_A.srt
+train_srt/JUST_GO_WITH_IT.srt
+train_srt/KNOCKED_UP.srt
+train_srt/LARRY_CROWNE.srt
+train_srt/LITTLE_FOCKERS.srt
+train_srt/MORNING_GLORY.srt
+train_srt/NO_STRINGS_ATTACHED.srt
+train_srt/THE_ART_OF_GETTING_BY.srt
+train_srt/THE_VOW.srt
+train_srt/THINK_LIKE_A_MAN.srt
+train_srt/THIS_MEANS_WAR.srt
+train_srt/ZOOKEEPER.srt
+valid_srt/HOW_DO_YOU_KNOW.srt
