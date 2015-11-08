@@ -1,6 +1,7 @@
 21 Jump Street	Action, Comedy, Crime
 30 Minutes or Less	Action, Comedy, Crime
 The 40-Year-Old Virgin	Comedy, Romance
+500DAYSOFSUMMER	N/A
 Abraham Lincoln Vampire Hunter: The Great Calamity	Animation, Short, Fantasy
 A Good Day to Die Hard	Action, Crime, Thriller
 A Thousand Words	Comedy, Drama
@@ -24,6 +25,8 @@ Grown Ups	Comedy
 Hugo	Adventure, Drama, Family
 In Time	Action, Sci-Fi, Thriller
 Iron Man 2	Action, Adventure, Sci-Fi
+ITS COMPLICATED	N/A
+JULIE AND JULIA	N/A
 Just Go with It	Comedy, Romance
 Karate Kid	Action, Sport
 Katy Perry: Part of Me	Documentary, Music
@@ -33,14 +36,18 @@ Larry Crowne	Comedy, Drama, Romance
 Life of Pi	Adventure, Drama, Fantasy
 Little Fockers	Comedy, Romance
 Morning Glory	Comedy, Drama, Romance
+MR POPPERS PENGUINS	N/A
 Nanny McPhee Returns	Comedy, Family, Fantasy
 No Strings Attached	Comedy, Romance
 Parental Guidance	Comedy, Family
+PERCY JACKSON LIGHTENING THIEF	N/A
 Prometheus	Adventure, Mystery, Sci-Fi
 Robin Hood	Action, Adventure, Drama
 Ruby Sparks	Comedy, Drama, Fantasy
 Salt	Action, Crime, Mystery
 Sanctum	Adventure, Drama, Thriller
+SNOW FLOWER FD	N/A
+SORCERERS APPRENTICE	N/A
 Soul Surfer	Biography, Drama, Sport
 Super 8	Mystery, Sci-Fi, Thriller
 The Adventures of Tintin	Animation, Action, Adventure
@@ -58,6 +65,8 @@ Thor	Action, Adventure, Fantasy
 Tooth Fairy	Comedy, Family, Fantasy
 True Grit	Adventure, Drama, Western
 We Bought a Zoo	Comedy, Drama, Family
+WHATS YOUR NUMBER	N/A
+XMEN FIRST CLASS	N/A
 Young Adult	Comedy, Drama
 Zombieland	Adventure, Comedy, Horror
 Zookeeper	Comedy, Family, Romance
@@ -69,11 +78,15 @@ How Do You Know	Comedy, Drama, Romance
 The Ides of March	Drama
 The Big Year	Comedy
 The Roommate	Drama, Horror, Thriller
+TITANIC 1	N/A
+TITANIC 2	N/A
 Can't Wait for the Movies: Big Mommas Like Father Like Son	Short, Comedy
+BLINDDATING	N/A
 Friends with Benefits	Comedy, Romance
 Inside Man	Crime, Drama, Mystery
 Jack and Jill	Comedy
 Public Enemies	Biography, Crime, Drama
+SPARKLE 2012	N/A
 The Bounty Hunter	Action, Comedy, Romance
 The Descendants	Comedy, Drama
 The Ugly Truth	Comedy, Romance
