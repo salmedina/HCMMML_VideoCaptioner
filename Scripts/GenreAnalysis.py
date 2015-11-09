@@ -176,5 +176,5 @@ def main_caption():
     
 
 if __name__ == '__main__':
-    #main_analysis()
-    main_caption()
+    main_analysis()
+    #main_caption()

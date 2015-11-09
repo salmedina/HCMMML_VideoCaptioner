@@ -1,72 +1,36 @@
-import random
-from math import sqrt
-from PIL import Image
-from collections import namedtuple
+from sklearn.cluster import MiniBatchKMeans
+import numpy as np
+import argparse
+import cv2
 
-# Use named tuples as storing structures
-Point = namedtuple('Point', ('coords', 'n', 'ct'))
-Cluster = namedtuple('Cluster', ('points', 'center', 'n'))
 
-def get_points(img):
-    ''''''
-    points = []
-    w, h = img.size
-    for count, color in img.getcolors(w * h):
-        points.append(Point(color, 3, count))
-    return points
-
-def rtoh(rgb):
-    '''Returns the hex string of an RGB triplet'''
-    return '#%s' % ''.join(('%02x' % p for p in rgb))
-
-def colorz(filename, n=3):
-    img = Image.open(filename)
-    img.thumbnail((200, 200))   #Downscale to improve clustering performance    
-    w, h = img.size
-
-    points = get_points(img)
-    clusters = kmeans(points, n, 1)
-    rgbs = [map(int, c.center.coords) for c in clusters]
-    return map(rtoh, rgbs)
-
-def euclidean(p1, p2):
-    return sqrt(sum([
-        (p1.coords[i] - p2.coords[i]) ** 2 for i in range(p1.n)
-    ]))
-
-def calculate_center(points, n):
-    vals = [0.0 for i in range(n)]
-    plen = 0
-    for p in points:
-        plen += p.ct
-        for i in range(n):
-            vals[i] += (p.coords[i] * p.ct)
-    return Point([(v / plen) for v in vals], n, 1)
-
-def kmeans(points, k, min_diff):    
-    clusters = [Cluster([p], p, p.n) for p in random.sample(points, k)]
-
-    while 1:
-        plists = [[] for i in range(k)]
-
-        for p in points:
-            smallest_distance = float('Inf')
-            for i in range(k):
-                distance = euclidean(p, clusters[i].center)
-                if distance < smallest_distance:
-                    smallest_distance = distance
-                    idx = i
-            plists[idx].append(p)
-
-        diff = 0
-        for i in range(k):
-            old = clusters[i]
-            center = calculate_center(plists[i], old.n)
-            new = Cluster(plists[i], center, old.n)
-            clusters[i] = new
-            diff = max(diff, euclidean(old.center, new.center))
-
-        if diff < min_diff:
-            break
-
-    return clusters
+def get_dominant_color(image):
+    # load the image and grab its width and height
+    (h, w) = image.shape[:2]
+    
+    # convert the image from the RGB color space to the L*a*b*
+    # In the L*a*b* color space the euclidean distance implies
+    # perceptual meaning as in RGB it does not
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    
+    # reshape image for k-means
+    image = image.reshape((image.shape[0] * image.shape[1], 3))
+    
+    # Do K-means in minibatch as it is faster given that it works
+    # on a subsample of the points and has similar results
+    clt = MiniBatchKMeans(n_clusters = 1)
+    labels = clt.fit_predict(image)
+    quant = clt.cluster_centers_.astype("uint8")[labels]
+    quant = quant.reshape((h, w, 3))
+    
+    quant = cv2.cvtColor(quant, cv2.COLOR_LAB2RGB)
+    return quant[0][0]
+    
+    
+def main():
+    sampleImage = '/Users/zal/Desktop/bounty.png'
+    image = cv2.imread(sampleImage)
+    print get_dominant_color(image)
+    
+if __name__ == '__main__':
+    main()
