@@ -2,6 +2,7 @@
 
 import cv2
 import os
+import glob
 import fileinput
 import fnmatch
 import pdb
@@ -44,8 +45,13 @@ def capture_movie_frames(base_path,path1,path2,out_path):
     
     #Go through all the video files in the folder
     for video_filename in os.listdir(os.path.join(base_path,path1,path2)):
-        #The original videos are in .avi format
+        #We are only interested in the AVI video files
         if fnmatch.fnmatch(video_filename,'*.avi'):
+            #If already screen capped, go to next file
+            video_basename = os.path.splitext(os.path.basename(video_filename))[0]
+            if len(glob.glob(os.path.join(out_path,path1)+'/'+video_basename+'*.png')) > 0:
+                continue
+            
             print 'Seeking frame for: %s'%(video_filename)
             #Persist until a video frame is captured
             captured_frame = False
@@ -76,14 +82,12 @@ def capture_movie_frames(base_path,path1,path2,out_path):
                         key = cv2.waitKey(33) #33 [ms] to achieve ~30 FPS
                         
                         if key == 32:  # SPACE: Toggle PAUSE / PLAY
-                            if video_paused:
-                                video_paused = not video_paused
+                            video_paused = not video_paused
                         elif key == ord('n') or key == ord('N'):  # STEP BACK
                             video_paused = True
                             if len(frame_buffer) > 0 and len(frame_buffer)+inbuffer_index > 1:
                                 inbuffer_index -= 1
                                 _,cur_frame = frame_buffer[inbuffer_index]
-                            print len(frame_buffer), inbuffer_index, frame_num+inbuffer_index
                         elif key == ord('m') or key == ord('M'):  # STEP FORWARD
                             video_paused = True
                             if inbuffer_index < -1: #we are navigating within the buffer
@@ -94,7 +98,6 @@ def capture_movie_frames(base_path,path1,path2,out_path):
                                 ret, cur_frame = video_capture.read()
                                 frame_num += 1  #always show from frame 2
                                 frame_buffer.append((frame_num, cur_frame))
-                            print len(frame_buffer), inbuffer_index, frame_num+inbuffer_index
                         elif key == ord('.'): # Store frame
                             # Capture current frame
                             outfile = video_filename[0:len(video_filename)-4] + '_%05d' %(frame_num+inbuffer_index) + '.png'
