@@ -13,7 +13,7 @@ from collections import deque
 from collections import namedtuple
 from matplotlib import pyplot as plt
 
-Settings = namedtuple('Settings', ['base_path', 'output_path','video_dir','movie_dir'])
+Settings = namedtuple('Settings', ['base_path', 'output_path','video_dir','movie_dir','cc_dict_path'])
 
 def setup_term(fd, when=termios.TCSAFLUSH):
     mode = termios.tcgetattr(fd)
@@ -34,11 +34,16 @@ def getch(timeout=None):
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-def capture_movie_frames(base_path,path1,path2,out_path):
+def capture_movie_frames(base_path, path1, path2, out_path, cc_dict_path):
     '''
     All the videos in the paths are shown to the user
     The player allows through keyboard input to play/pause and capture the video
     '''
+    #Load the captions dictionary
+    cc_dict = None
+    if os.path.isfile(cc_dict_path):
+        cc_dict = pickle.load(open(cc_dict_path, 'rb'))
+    
     # make the output path if it does not exist
     if not os.path.isdir(os.path.join(out_path,path1)):
         os.makedirs(os.path.join(out_path,path1))
@@ -52,7 +57,12 @@ def capture_movie_frames(base_path,path1,path2,out_path):
             if len(glob.glob(os.path.join(out_path,path1)+'/'+video_basename+'*.png')) > 0:
                 continue
             
-            print 'Seeking frame for: %s'%(video_filename)
+            print video_filename
+            if cc_dict is not None:
+                video_filename_no_ext = os.path.splitext(video_filename)[0]
+                if video_filename_no_ext in cc_dict:
+                    print 'Seeking frame for'
+                    print cc_dict[video_filename_no_ext]
             #Persist until a video frame is captured
             captured_frame = False
             while not captured_frame:
@@ -111,13 +121,13 @@ def capture_movie_frames(base_path,path1,path2,out_path):
                         
                 cv2.destroyWindow(video_filename)
 
-def main(base_path, out_path, path2vid, movie_path):
+def main(base_path, out_path, path2vid, movie_path, cc_dict_path):
     # Ensure output path exists
     if not os.path.isdir(out_path):
         os.makedirs(out_path)
 
     # Process all the clips of the movie
-    capture_movie_frames(base_path,movie_path[0:len(movie_path)],path2vid,out_path)
+    capture_movie_frames(base_path,movie_path[0:len(movie_path)],path2vid,out_path, cc_dict_path)
 
                 
 if __name__ == '__main__': 
@@ -133,27 +143,36 @@ if __name__ == '__main__':
         settings = Settings("/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/DVDtranscription",\
                             "/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/DVDTranscriptionKeyFrames",\
                             "video",\
-                            'THE_VOW')
+                            'THE_VOW',\
+                            '/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/all_captions_dict.p')
     
     #Ask for changes or leave default
     print 'Setting up frame grabber, leave empty if you would like to work with default.'
+    #BASE PATH
     inText = raw_input("Base path (%s):\n"%(settings.base_path))
-    if inText is not '':
-        settings.base_path = inText
+    if len(inText) > 0:
+        settings = settings._replace(base_path = inText)
+    #OUTPUT PATH
     inText = raw_input("Output path (%s):\n"%(settings.output_path))
-    if inText is not '':
-        settings.output_path = inText
+    if len(inText) > 0:
+        settings = settings._replace(output_path = inText)
+    #CAPTIONS DICTIONARY
+    inText = raw_input("Captions dictionary (%s):\n"%(settings.cc_dict_path))
+    if len(inText) > 0:
+        settings = settings._replace(cc_dict_path = inText)
+    #VIDEO DIR
     inText = raw_input("Path to video (%s):\n"%(settings.video_dir))
-    if inText is not '':
-        settings.video_dir = inText
+    if len(inText) > 0:
+        settings = settings._replace(video_dir = inText)
+    #MOVIES DIR
     inText = raw_input("Type the folder name of the movie (%s):"%(settings.movie_dir))
-    if inText is not '':
-        settings.movie_dir = inText
+    if len(inText) > 0:
+        settings = settings._replace(movie_dir = inText)
     
     # Save current settings
     pickle.dump(settings, open(settings_filename, 'wb'))
     
     #Start program
-    main(settings.base_path, settings.output_path, settings.video_dir, settings.movie_dir)
+    main(settings.base_path, settings.output_path, settings.video_dir, settings.movie_dir, settings.cc_dict_path)
     
     print 'Session ended'
