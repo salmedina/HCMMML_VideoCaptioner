@@ -2,9 +2,11 @@ from sklearn.cluster import MiniBatchKMeans
 import numpy as np
 import argparse
 import cv2
+import pdb
 
 
 def get_dominant_color(image):
+   # pdb.set_trace()
     # load the image and grab its width and height
     (h, w) = image.shape[:2]
     
@@ -28,8 +30,9 @@ def get_dominant_color(image):
     
     
 def main():
-    sampleImage = '/Users/zal/Desktop/bounty.png'
+    sampleImage = '/media/chahuja/DATAPART1/my-data/local/MontrealVideoAnnotationDataset/DVDtranscriptionFrames/40_YEAR_OLD_VIRGIN/40_YEAR_OLD_VIRGIN_DVS100/40_YEAR_OLD_VIRGIN_DVS100_00001.png'
     image = cv2.imread(sampleImage)
+    #print image
     print get_dominant_color(image)
     
 if __name__ == '__main__':

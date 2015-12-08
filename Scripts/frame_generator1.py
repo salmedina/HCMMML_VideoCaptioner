@@ -39,19 +39,20 @@ def video2frames(base_path,path1,path2,out_path):
 
                 
 
+if __name__ == '__main__': 
+    
+    ##defining the basic variables
+    base_path = "/media/chahuja/DATAPART1/my-data/local/MontrealVideoAnnotationDataset/DVDtranscription"
+    out_path = "/media/chahuja/DATAPART1/my-data/local/MontrealVideoAnnotationDataset/DVDtranscriptionFrames"
+    path2vid = "video"
 
-#defining the basic variables
-base_path = "/media/chahuja/DATAPART1/my-data/local/MontrealVideoAnnotationDataset/DVDtranscription"
-out_path = "/media/chahuja/DATAPART1/my-data/local/MontrealVideoAnnotationDataset/DVDtranscriptionFrames"
-path2vid = "video"
+    ## make the output path if it does not exist
+    if ( not os.path.isdir(out_path) ):
+        os.makedirs(out_path)
 
-# make the output path if it does not exist
-if ( not os.path.isdir(out_path) ):
-    os.makedirs(out_path)
-
-# reading stdin line by line and generating frames for the given movies
-for line in fileinput.input():
-    print line
-    video2frames(base_path,line[0:len(line)-1],path2vid,out_path)
+    ## reading stdin line by line and generating frames for the given movies
+    for line in fileinput.input():
+        print line
+        video2frames(base_path,line[0:len(line)-1],path2vid,out_path)
     
 
