@@ -22,11 +22,11 @@ for srt_file in glob.glob(join(all_srt_path,'*.srt')):
         file_name = all_lines[i].strip()
         caption = all_lines[i+2].strip()
 
-        #Captions dict
+        #Captions dict Key:VideoFileName Value:Caption
         captions_dict[file_name]=caption
-        #Inverted dict based on captions
+        #Captions Inv Index  Key:Caption Value:Video FileName
         captions_inv_dict[caption]=file_name
-        #Inverted dict based on verbs
+        #Inverted dict based on verbs   Key: lemmatizedVerb Value: [(filename, caption), ...]
         caption_verbs = nlpa.extract_lemmatized_verbs(caption.decode('utf8'))
         for verb in caption_verbs:
             if verb not in verbs_dict:

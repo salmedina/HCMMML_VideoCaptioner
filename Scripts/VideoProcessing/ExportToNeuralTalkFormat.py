@@ -88,8 +88,8 @@ def export_to_neuraltalk(extraction_list, output_file):
     
     export_dict = {}
     for image, caption in extraction_list:
-        for image in image_list:
-            export_dict[image] = caption
+        
+        export_dict[image] = caption
     json.dump(export_dict, open(output_file, 'w'), indent=4)
 
 if __name__=='__main__':
@@ -99,7 +99,7 @@ if __name__=='__main__':
     settings.source_videos_dir = '/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/DVDtranscription'
     settings.annotation_file = '/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/video_action_annotations.csv'
     settings.output_dir = '/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/DVDTranscriptionKeyFrames'
-    settings.sample_rate = 15
+    settings.sample_rate = 7
     settings.frame_height = 240
     settings.frame_width = 427
     
