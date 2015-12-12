@@ -120,7 +120,7 @@ def display_video_capture(video_file_path, capture_dir=''):
                 elif key == ord('j') or key == ord('J'):    # JUMP to next file
                     captured_frame = True
                     break
-                elif key == 27 or key == 'q' or key == 'Q': # ESC: exit program 
+                elif key == 27 or key == ord('q') or key == ord('Q'): # ESC: exit program 
                     cv2.destroyWindow(video_filename)
                     exit = True
                     break
@@ -171,21 +171,30 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
     video_list = map(lambda x:x.strip(), video_list) #clean all the \r, \n, spaces, etc
     #Load the captions dictionary
     cc_dict = pickle.load(open(cc_dict_path))
+    #Annotated index
+    annotated_index ={}
+    if os.path.isfile('annotatedIdx.p'):
+        annotated_index = pickle.load(open('annotatedIdx.p'))
     #Annotation definition
     #is a tuple with (video_name, in, out, caption)
-    annotated_index ={}
+    
     annotation_list = []
     for video_name in video_list:
         caption = ''
         video_path = build_video_path(base_path, video_name)
-        if video_name in cc_dict and not in annotated_index:
+        if video_name in cc_dict and video_name not in annotated_index:
+            caption = cc_dict[video_name]
             print 'Annotating: %s'%(video_name)
-            print 'Caption: %s'%(cc_dict[video_name])
-            skipped, start_frame, end_frame, ss = display_video_capture(video_path)
+            print 'Caption: %s'%(caption)
+            exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path)
+            if exit:
+                print 'Closing program'
+                break
             if not skipped:
                 annotated_index[video_name]='annotated'
                 annotation_list.append((video_name+'.avi', start_frame, end_frame, caption))
-                open(annotations_path, 'a').write('\t'.joint((video_name+'.avi', start_frame, end_frame, caption))
+                new_line = '\t'.join((video_name+'.avi', str(start_frame), str(end_frame), caption)) + '\n'
+                open(annotations_path, 'a').write(new_line)
             else:
                 annotated_index[video_name]='skipped'
             pickle.dump(annotated_index,open('annotatedIdx.p','wb'))
