@@ -20,14 +20,16 @@ class VASettings:
     movie_dir = ''
     cc_dict_path = ''
     video_list_path = ''
+    action_dict_path = ''
     
-    def __init__(self, base_path='', output_path='', movie_dir='', video_dir='', cc_dict_path='', video_list_path=''):
+    def __init__(self, base_path='', output_path='', movie_dir='', video_dir='', cc_dict_path='', video_list_path='', action_dict_path=''):
         self.base_path = base_path
         self.output_path = output_path
         self.video_dir = video_dir
         self.movie_dir = movie_dir
         self.cc_dict_path = cc_dict_path
         self.video_list_path = video_list_path
+        self.action_dict_path = action_dict_path
 
 def setup_term(fd, when=termios.TCSAFLUSH):
     mode = termios.tcgetattr(fd)
@@ -161,7 +163,7 @@ def capture_movie_frames(base_path, path1, path2, out_path, cc_dict_path):
                     video_file_path = os.path.join(base_path,path1,path2,video_filename)
                     display_video_capture(video_file_path, out_path)
 
-def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_path):
+def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_path, actions_dict_path):
     '''
     All the vidoes in the movie_path_list are shown to the user
     The player allows through keyboard input to play/pause, capture the video and set start/end times
@@ -171,6 +173,7 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
     video_list = map(lambda x:x.strip(), video_list) #clean all the \r, \n, spaces, etc
     #Load the captions dictionary
     cc_dict = pickle.load(open(cc_dict_path))
+    actions_dict = pickle.load(open(actions_dict_path))
     #Annotated index
     annotated_index ={}
     if os.path.isfile('annotatedIdx.p'):
@@ -184,8 +187,11 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
         video_path = build_video_path(base_path, video_name)
         if video_name in cc_dict and video_name not in annotated_index:
             caption = cc_dict[video_name]
+            actions = actions_dict[video_name]
             print 'Annotating: %s'%(video_name)
+            print 'Actions: %s'%(', '.join(actions))
             print 'Caption: %s'%(caption)
+            
             exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path)
             if exit:
                 print 'Closing program'
@@ -250,7 +256,8 @@ def display_annotate_settings_menu():
         settings = VASettings(base_path='/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDataset/DVDtranscription/',\
                             video_list_path="/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/actions_video_list.txt",\
                             output_path="/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/video_action_annotations.csv",\
-                            cc_dict_path='/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/all_captions_dict.p')
+                            cc_dict_path='/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/all_captions_dict.p',\
+                            action_dict_path='/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/all_video_action_dict.p')
     
     #Ask for changes or leave default
     print 'Setting up the video annotator, leave the entry empty if you would like to work with the default value.'
@@ -269,13 +276,16 @@ def display_annotate_settings_menu():
     #CAPTIONS DICTIONARY
     inText = raw_input("Captions dictionary (%s):\n"%(settings.cc_dict_path))
     if len(inText) > 0:
-        settings = settings.cc_dict_path = inText
+        settings.cc_dict_path = inText
+    #ACTIONS DICTIONARY
+    inText = raw_input("Actions dictionary (%s):\n"%(settings.cc_dict_path))
+    if len(inText) > 0:
+        settings.action_dict_path = inText
     
     # Save current settings
     pickle.dump(settings, open(settings_filename, 'wb'))
     
     return settings
-
 
 if __name__ == '__main__': 
     '''
@@ -292,6 +302,6 @@ if __name__ == '__main__':
         capture_movie_frames(settings.base_path, settings.output_path, settings.video_dir, settings.movie_dir, settings.cc_dict_path)
     elif app_mode == '2':
         settings = display_annotate_settings_menu()
-        annotate_movie_times(settings.base_path, settings.video_list_path, settings.cc_dict_path, settings.output_path)
+        annotate_movie_times(settings.base_path, settings.video_list_path, settings.cc_dict_path, settings.output_path, settings.action_dict_path)
     
     print 'Session ended'

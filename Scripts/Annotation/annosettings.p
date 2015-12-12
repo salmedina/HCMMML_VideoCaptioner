@@ -25,4 +25,8 @@ p11
 sS'movie_dir'
 p12
 g3
+sS'action_dict_path'
+p13
+S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/all_video_action_dict.p'
+p14
 sb.
