@@ -10,10 +10,10 @@ VIDEO_FPS = 30
 
 def build_video_path(base_path, video_name):
     movie_name = re.search(r'(.*)_DVS\d*', video_name).group(1)
-    return os.path.join(base_path, movie_name,'video',video_name+'.avi')
+    return os.path.join(base_path, movie_name,'video',video_name)
 
 def sample_frames(video_filepath, start_frame, end_frame, output_path, \
-                  sample_rate, frame_width, frame_height):
+                  sample_rate, frame_height, frame_width):
     '''Returns the list of extracted frames file paths'''
     
     #Initialize the video capture
@@ -47,10 +47,18 @@ def sample_frames(video_filepath, start_frame, end_frame, output_path, \
     
     return captured_img_list
 
-def extract_frames(videos_dir, annotation_file, output_file):
+def extract_frames(videos_dir, annotation_file, output_file, sample_rate, frame_height, frame_width):
     '''Returns a list of captions with their respective list of images (caption, [list of images])'''
     #Open the annotations file
     annotation_list = open(annotation_file, 'r').readlines()
+    
+    for annotation in annotation_list:
+        video_filename, start_frame, end_frame, caption = annotation.split('\t')
+        video_path = build_video_path(videos_dir, video_name)
+        captured_frames_list = sample_frames(video_path, start_frame, end_frame, output_path, \
+                                             sample_rate, frame_height, frame_width)
+    
+    return captured_frames_list
     
 def export_to_neuraltalk(extraction_list, output_file):
     '''Converts the extraction to NeuralTalk import JSON file '''
@@ -76,6 +84,6 @@ if __name__=='__main__':
     extraction_list = extract_frames(args.source_videos_dir, \
                      args.annotation_file, \
                      args.output_dir, \
-                     args.sample_rate, args.frame_width, args.frame_height)
-
+                     args.sample_rate, args.frame_height, args.frame_width)
+    
     export_to_neuraltalk(extraction_list, args.output_file)
