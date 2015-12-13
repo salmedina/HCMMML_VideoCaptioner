@@ -278,7 +278,7 @@ def display_annotate_settings_menu():
     if len(inText) > 0:
         settings.cc_dict_path = inText
     #ACTIONS DICTIONARY
-    inText = raw_input("Actions dictionary (%s):\n"%(settings.cc_dict_path))
+    inText = raw_input("Actions dictionary (%s):\n"%(settings.action_dict_path))
     if len(inText) > 0:
         settings.action_dict_path = inText
     
