@@ -48,12 +48,14 @@ def display_video_capture(video_file_path, capture_dir=''):
     exit = False
     start_frame = 0
     end_frame = 0
+    frame_pos = 0
     video_filename = os.path.basename(os.path.splitext(video_file_path)[0])
     while not captured_frame and not skipped and not exit:
         # start the video capture objec
         # Player variables
         video_paused = False
         inbuffer_index = 0
+        last_frame = frame_pos-1
         frame_buffer = deque(maxlen=60)
         # Initialize video capture object
         video_capture = cv2.VideoCapture(video_file_path)
@@ -112,13 +114,25 @@ def display_video_capture(video_file_path, capture_dir=''):
                     if end_frame < start_frame:
                         end_frame = start_frame
                     print 'IN: %d     OUT: %d'%(start_frame, end_frame)
-                    
+                
+                elif key == ord('s') or key == ord('S'):    # Set START point
+                    start_frame = 1
+                    if end_frame < start_frame:
+                        end_frame = start_frame
+                    print 'IN: %d     OUT: %d'%(start_frame, end_frame)
+
                 elif key == ord('c') or key == ord('C'):    # Set STOP point
                     end_frame = frame_pos+inbuffer_index
                     if start_frame > end_frame:
                         start_frame = end_frame
                     print 'IN: %d     OUT: %d'%(start_frame, end_frame)
-                    
+                
+                elif key == ord('f') or key == ord('F'):    # Set STOP point
+                    end_frame = last_frame
+                    if start_frame > end_frame:
+                        start_frame = end_frame
+                    print 'IN: %d     OUT: %d'%(start_frame, end_frame)
+
                 elif key == ord('j') or key == ord('J'):    # JUMP to next file
                     captured_frame = True
                     break
