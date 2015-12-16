@@ -9,6 +9,9 @@ import cPickle as pickle
 
 MovieClip = collections.namedtuple('MovieClip', 'filename caption pos verbs lemma_verbs')
 
+def remove_invalid_unicode(inStr):
+    return re.sub(r'[^\x00-\x7f]',r' ',inStr)
+
 def flatten_list(inList):
     return [item for sublist in inList for item in sublist]
 

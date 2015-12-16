@@ -16,11 +16,11 @@ S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Dataset/MontrealVideoAnnotationDat
 p7
 sS'output_path'
 p8
-S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/video_action_annotations.csv'
+S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/VideoAnnotation/climb.csv'
 p9
 sS'video_list_path'
 p10
-S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/actions_video_list.txt'
+S'/Users/zal/CMU/Fall2015/HCMMML/FinalProject/Repository/DataProcessing/VideoAnnotation/climb.txt'
 p11
 sS'movie_dir'
 p12
