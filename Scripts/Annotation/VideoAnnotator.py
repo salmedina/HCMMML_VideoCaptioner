@@ -14,6 +14,9 @@ from collections import namedtuple
 from matplotlib import pyplot as plt
 
 class VASettings:
+    '''
+    This is the datastructure that stores the capturing session
+    '''
     base_path = ''
     output_path = ''
     video_dir = ''
@@ -31,14 +34,28 @@ class VASettings:
         self.video_list_path = video_list_path
         self.action_dict_path = action_dict_path
 
-def setup_term(fd, when=termios.TCSAFLUSH):
-    mode = termios.tcgetattr(fd)
-    mode[tty.LFLAG] = mode[tty.LFLAG] & ~(termios.ECHO | termios.ICANON)
-    termios.tcsetattr(fd, when, mode)
-
 def build_video_path(base_path, video_name):
     movie_name = re.search(r'(.*)_DVS\d*', video_name).group(1)
     return os.path.join(base_path, movie_name,'video',video_name+'.avi')
+
+def print_manual():
+    print '''
+    The keyboard controls for the video annotation tool are:
+    
+    Space  - Play / Pause
+    
+    N      - Step backwards
+    M      - Step forward
+    .      - Capture frame
+    X      - Start point @ current frame
+    C      - End point   @ current frame
+    S      - Start point @ first frame
+    F      - End point   @ last frame
+    J      - Jump to next file
+    H      - Show keyboard controls
+    ESC, Q - Exit program
+    
+    '''
 
 def display_video_capture(video_file_path, capture_dir=''):
     #Persist until a video frame is captured
@@ -78,7 +95,7 @@ def display_video_capture(video_file_path, capture_dir=''):
                 cv2.imshow(video_filename, cur_frame)
 
                 # Monitor keyboard input
-                key = cv2.waitKey(33) #33 [ms] to achieve ~30 FPS
+                key = cv2.waitKey(33) # 33[ms] to achieve ~30 FPS
 
                 if key == 32:  # SPACE: Toggle PAUSE / PLAY
                     video_paused = not video_paused
@@ -150,6 +167,9 @@ def capture_movie_frames(base_path, path1, path2, out_path, cc_dict_path):
     All the videos in the paths are shown to the user
     The player allows through keyboard input to play/pause and capture the video
     '''
+    # Print the manual
+    print_manual()
+    
     #Load the captions dictionary
     cc_dict = None
     if os.path.isfile(cc_dict_path):
@@ -182,6 +202,9 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
     All the vidoes in the movie_path_list are shown to the user
     The player allows through keyboard input to play/pause, capture the video and set start/end times
     '''
+    # Print the manual
+    print_manual()    
+    
     #Get list of videos from file
     video_list = open(video_list_path).readlines()
     video_list = map(lambda x:x.strip(), video_list) #clean all the \r, \n, spaces, etc
@@ -234,26 +257,27 @@ def display_capture_settings_menu():
     
     #Ask for changes or leave default
     print 'Setting up the frame grabber, leave the entry empty if you would like to work with default value.'
+    print ''
     #BASE PATH
-    inText = raw_input("Base path (%s):\n"%(settings.base_path))
+    inText = raw_input("DATASET PATH\n[ %s ]:\n"%(settings.base_path))
     if len(inText) > 0:
         settings.base_path = inText
     #OUTPUT PATH
-    inText = raw_input("Output path (%s):\n"%(settings.output_path))
+    inText = raw_input("OUTPUT PATH\n[ %s ]:\n"%(settings.output_path))
     if len(inText) > 0:
         settings.output_path = inText
     #CAPTIONS DICTIONARY
-    inText = raw_input("Captions dictionary (%s):\n"%(settings.cc_dict_path))
+    inText = raw_input("CAPTIONS DICTIONARY\n[ %s ]:\n"%(settings.cc_dict_path))
     if len(inText) > 0:
         settings = settings.cc_dict_path = inText
     #VIDEO DIR
-    inText = raw_input("Path to video (%s):\n"%(settings.video_dir))
+    inText = raw_input("VIDEOS' DIRECTORY\n[ %s ]:\n"%(settings.video_dir))
     if len(inText) > 0:
-        settings = settings.video_dir = inText
+        settings.video_dir = inText
     #MOVIES DIR
-    inText = raw_input("Type the folder name of the movie (%s):"%(settings.movie_dir))
+    inText = raw_input("MOVIE DIRECTORY\n[ %s ]:"%(settings.movie_dir))
     if len(inText) > 0:
-        settings = settings.movie_dir = inText
+        settings.movie_dir = inText
     
     # Save current settings
     pickle.dump(settings, open(settings_filename, 'wb'))
@@ -276,23 +300,23 @@ def display_annotate_settings_menu():
     #Ask for changes or leave default
     print 'Setting up the video annotator, leave the entry empty if you would like to work with the default value.'
     #BASE PATH
-    inText = raw_input("Base path (%s):\n"%(settings.base_path))
+    inText = raw_input("DATASET PATH\n[ %s ]:\n"%(settings.base_path))
     if len(inText) > 0:
         settings.base_path = inText
     #VIDEO LIST FILE
-    inText = raw_input("Video list file (%s):\n"%(settings.video_list_path))
+    inText = raw_input("VIDEO LIST FILE\n[ %s ]:\n"%(settings.video_list_path))
     if len(inText) > 0:
         settings.video_list_path = inText
     #OUTPUT FILE
-    inText = raw_input("Output file (%s):\n"%(settings.output_path))
+    inText = raw_input("OUTPUT FILE\n[ %s ]:\n"%(settings.output_path))
     if len(inText) > 0:
         settings.output_path = inText
     #CAPTIONS DICTIONARY
-    inText = raw_input("Captions dictionary (%s):\n"%(settings.cc_dict_path))
+    inText = raw_input("CAPTIONS DICTIONARY\n[ %s ]:\n"%(settings.cc_dict_path))
     if len(inText) > 0:
         settings.cc_dict_path = inText
     #ACTIONS DICTIONARY
-    inText = raw_input("Actions dictionary (%s):\n"%(settings.action_dict_path))
+    inText = raw_input("ACTIONS DICTIONARY\n[ %s ]:\n"%(settings.action_dict_path))
     if len(inText) > 0:
         settings.action_dict_path = inText
     
@@ -300,6 +324,7 @@ def display_annotate_settings_menu():
     pickle.dump(settings, open(settings_filename, 'wb'))
     
     return settings
+    
 
 if __name__ == '__main__': 
     '''
