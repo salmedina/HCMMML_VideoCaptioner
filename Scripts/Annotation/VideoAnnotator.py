@@ -9,6 +9,7 @@ import pdb
 import tty, sys, termios
 import select
 import pickle
+from nltk.tokenize import sent_tokenize
 from collections import deque
 from collections import namedtuple
 from matplotlib import pyplot as plt
@@ -56,6 +57,19 @@ def print_manual():
     ESC, Q - Exit program
     
     '''
+    
+def get_total_frames(video_file_path):
+    video_capture = cv2.VideoCapture(video_file_path)
+    ret, cur_frame = video_capture.read()
+    total_frames = 0
+    while ret:
+        total_frames += 1
+        ret, cur_frame = video_capture.read()
+    
+    return total_frames
+
+def draw_overlay(cur_frame, start_frame, end_frame, total_frames):
+    pass
 
 def display_video_capture(video_file_path, capture_dir=''):
     #Persist until a video frame is captured
@@ -65,6 +79,7 @@ def display_video_capture(video_file_path, capture_dir=''):
     exit = False
     start_frame = 0
     end_frame = 0
+    total_frames = get_total_frames(video_file_path)
     frame_pos = 0
     video_filename = os.path.basename(os.path.splitext(video_file_path)[0])
     while not captured_frame and not skipped and not exit:
@@ -92,7 +107,9 @@ def display_video_capture(video_file_path, capture_dir=''):
                     frame_buffer.append((frame_pos, cur_frame))
             if ret:
                 # Show the frame
+                overlayed_frame = draw_overlay(cur_frame, start_frame, end_frame, total_frames)
                 cv2.imshow(video_filename, cur_frame)
+                
 
                 # Monitor keyboard input
                 key = cv2.waitKey(33) # 33[ms] to achieve ~30 FPS
@@ -227,7 +244,7 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
             actions = actions_dict[video_name]
             print 'Annotating: %s'%(video_name)
             print 'Actions: %s'%(', '.join(actions))
-            print 'Caption: %s'%(caption)
+            print 'Caption:\n%s'%('\n'.join(sent_tokenize(caption)))
             
             exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path)
             if exit:
