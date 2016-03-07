@@ -76,8 +76,21 @@ def get_total_frames(video_file_path):
     
     return total_frames
 
-def draw_overlay(cur_frame, start_frame, end_frame, total_frames):
-    pass
+def draw_playbar(img, cur_frame_pos, start_frame, end_frame, total_frames):
+    return img
+
+def draw_timer(img, cur_frame_pos, total_frames):
+    img_height, img_width, img_channels = img.shape
+    timer_text = "%d/%d"%(cur_frame_pos, total_frames)
+    timer_pos = (img_width - 100,20)
+    timer_color = (255,255,255)
+    cv2.putText(img, timer_text, timer_pos, cv2.FONT_HERSHEY_PLAIN, 1.0, timer_color)
+    return img
+
+def draw_overlay(img, cur_frame, start_frame, end_frame, total_frames):
+    overlayed_frame = draw_playbar(img, cur_frame, start_frame, end_frame, total_frames)
+    overlayed_frame = draw_timer(overlayed_frame, cur_frame, total_frames)
+    return overlayed_frame
 
 def display_video_capture(video_file_path, capture_dir=''):
     #Persist until a video frame is captured
@@ -99,24 +112,24 @@ def display_video_capture(video_file_path, capture_dir=''):
         frame_buffer = deque(maxlen=60)
         # Initialize video capture object
         video_capture = cv2.VideoCapture(video_file_path)
-        ret, cur_frame = video_capture.read()
+        ret, cur_frame_img = video_capture.read()
         if ret:
             frame_pos = 1
-            frame_buffer.append((frame_pos, cur_frame))
+            frame_buffer.append((frame_pos, cur_frame_img))
         #While videocapture keeps on throwing videos
         while ret:
             if not video_paused:
                 if inbuffer_index < 0:   #we are reading from buffer
-                    _, cur_frame = frame_buffer[inbuffer_index]
+                    _, cur_frame_img = frame_buffer[inbuffer_index]
                     inbuffer_index += 1
                 else:
-                    ret, cur_frame = video_capture.read()
+                    ret, cur_frame_img = video_capture.read()
                     frame_pos += 1  #always show from frame 2
-                    frame_buffer.append((frame_pos, cur_frame))
+                    frame_buffer.append((frame_pos, cur_frame_img))
             if ret:
                 # Show the frame
-                overlayed_frame = draw_overlay(cur_frame, start_frame, end_frame, total_frames)
-                cv2.imshow(video_filename, cur_frame)
+                overlayed_frame = draw_overlay(cur_frame_img, frame_pos, start_frame, end_frame, total_frames)
+                cv2.imshow(video_filename, cur_frame_img)
                 
 
                 # Monitor keyboard input
@@ -129,25 +142,25 @@ def display_video_capture(video_file_path, capture_dir=''):
                     video_paused = True
                     if len(frame_buffer) > 0 and len(frame_buffer)+inbuffer_index > 1:
                         inbuffer_index -= 1
-                        _,cur_frame = frame_buffer[inbuffer_index]
+                        _,cur_frame_img = frame_buffer[inbuffer_index]
                         
                 elif key == ord('m') or key == ord('M'):  # STEP FORWARD
                     video_paused = True
                     if inbuffer_index < -1: #we are navigating within the buffer
                         inbuffer_index += 1
-                        _,cur_frame = frame_buffer[inbuffer_index]
+                        _,cur_frame_img = frame_buffer[inbuffer_index]
                     else:
                         inbuffer_index = 0
-                        ret, cur_frame = video_capture.read()
+                        ret, cur_frame_img = video_capture.read()
                         frame_pos += 1  #always show from frame 2
-                        frame_buffer.append((frame_pos, cur_frame))
+                        frame_buffer.append((frame_pos, cur_frame_img))
                         
                 elif key == ord('.'): # Store frame
                     # Capture current frame
                     if capture_dir is not '':
                         captured_file_name = video_file_path[0:len(video_file_path)-4] + '_%05d' %(frame_pos+inbuffer_index) + '.png'
                         print "Saving frame %s"%(captured_file_name)
-                        cv2.imwrite(os.path.join(capture_dir,captured_file_name),cur_frame)
+                        cv2.imwrite(os.path.join(capture_dir,captured_file_name),cur_frame_img)
                     captured_frame = True
                     break
                 
