@@ -9,7 +9,9 @@ import pdb
 import tty, sys, termios
 import select
 import pickle
-from nltk.tokenize import sent_tokenize
+import nltk
+from os.path import basename, join, splitext
+from nltk.tokenize import sent_tokenize, word_tokenize
 from collections import deque
 from collections import namedtuple
 from matplotlib import pyplot as plt
@@ -57,7 +59,13 @@ def print_manual():
     ESC, Q - Exit program
     
     '''
-    
+
+def is_verb_in_sentence(verb, sentence):
+    text = word_tokenize(sentence)
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+    lemma_words = [lemmatizer.lemmatize(word, 'v') for word in text]
+    return (verb in lemma_words)
+
 def get_total_frames(video_file_path):
     video_capture = cv2.VideoCapture(video_file_path)
     ret, cur_frame = video_capture.read()
@@ -223,6 +231,7 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
     print_manual()    
     
     #Get list of videos from file
+    target_action = splitext(basename(video_list_path))[0]
     video_list = open(video_list_path).readlines()
     video_list = map(lambda x:x.strip(), video_list) #clean all the \r, \n, spaces, etc
     #Load the captions dictionary
@@ -243,8 +252,9 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
             caption = cc_dict[video_name]
             actions = actions_dict[video_name]
             print 'Annotating: %s'%(video_name)
-            print 'Actions: %s'%(', '.join(actions))
-            print 'Caption:\n%s'%('\n'.join(sent_tokenize(caption)))
+            print 'Target Action: %s'%(target_action)
+            filtered_sents = [sentence for sentence in sent_tokenize(caption) if is_verb_in_sentence(target_action, sentence)]
+            print 'Caption:\n%s'%('\n'.join(filtered_sents))
             
             exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path)
             if exit:
