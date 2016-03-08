@@ -103,10 +103,14 @@ def draw_timer(img, cur_frame_pos, total_frames):
     timer_text = "%d/%d"%(cur_frame_pos, total_frames)
     timer_pos = (img_width - 100,20)
     timer_color = (255,255,255)
-    cv2.putText(img, timer_text, timer_pos, cv2.FONT_HERSHEY_PLAIN, 1.0, timer_color)
+    cv2.putText(img, timer_text, timer_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, timer_color)
     return img
 
 def draw_caption(img, caption):
+    img_height, img_width, img_channels = img.shape
+    caption_color = (21, 232, 232)
+    caption_pos = (10, img_height-30)
+    cv2.putText(img, caption, caption_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, caption_color)
     return img
 
 def draw_overlay(img, cur_frame, start_frame, end_frame, total_frames, caption =''):
@@ -116,7 +120,7 @@ def draw_overlay(img, cur_frame, start_frame, end_frame, total_frames, caption =
         overlayed_frame = draw_caption(img, caption)
     return overlayed_frame
 
-def display_video_capture(video_file_path, capture_dir=''):
+def display_video_capture(video_file_path, capture_dir='', caption=''):
     #Persist until a video frame is captured
     captured_file_name = ''
     captured_frame = False
@@ -152,7 +156,7 @@ def display_video_capture(video_file_path, capture_dir=''):
                     frame_buffer.append((frame_pos, cur_frame_img))
             if ret:
                 # Show the frame with overlay
-                overlayed_frame = draw_overlay(cur_frame_img.copy(), frame_pos+inbuffer_index, start_frame, end_frame, total_frames)
+                overlayed_frame = draw_overlay(cur_frame_img.copy(), frame_pos+inbuffer_index, start_frame, end_frame, total_frames, caption)
                 cv2.imshow(video_filename, overlayed_frame)
                 
 
@@ -291,9 +295,10 @@ def annotate_movie_times(base_path, video_list_path, cc_dict_path, annotations_p
             print 'Annotating: %s'%(video_name)
             print 'Target Action: %s'%(target_action)
             filtered_sents = [sentence for sentence in sent_tokenize(caption) if is_verb_in_sentence(target_action, sentence)]
-            print 'Caption:\n%s'%('\n'.join(filtered_sents))
+            displayed_caption = '\n'.join(filtered_sents)
+            print 'Caption:\n%s'%(displayed_caption)
             
-            exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path)
+            exit, skipped, start_frame, end_frame, ss = display_video_capture(video_path, caption=displayed_caption)
             if exit:
                 print 'Closing program'
                 break
