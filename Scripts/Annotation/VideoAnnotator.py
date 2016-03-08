@@ -77,6 +77,25 @@ def get_total_frames(video_file_path):
     return total_frames
 
 def draw_playbar(img, cur_frame_pos, start_frame, end_frame, total_frames):
+    img_height, img_width, img_channels = img.shape
+
+    # Playbar Constants
+    playbar_height = 10
+    played_color = (255, 255, 255)
+    not_played_color = (128, 128, 128)
+    in_played_color = (128, 255, 128)
+    in_not_played_color = (64, 128, 64)
+    
+    if cur_frame_pos > 0:
+        cur_pos = int(float(cur_frame_pos)/float(total_frames) * img_width)
+        # First draw the played area (highlighted)
+        cv2.rectangle(img, (0,img_height-playbar_height), (cur_pos, img_height), played_color, -1)
+        # Then the unplayed color
+        cv2.rectangle(img, (cur_pos+1,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
+    else:
+        cv2.rectangle(img, (0,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
+    
+    
     return img
 
 def draw_timer(img, cur_frame_pos, total_frames):
@@ -87,9 +106,14 @@ def draw_timer(img, cur_frame_pos, total_frames):
     cv2.putText(img, timer_text, timer_pos, cv2.FONT_HERSHEY_PLAIN, 1.0, timer_color)
     return img
 
-def draw_overlay(img, cur_frame, start_frame, end_frame, total_frames):
+def draw_caption(img, caption):
+    return img
+
+def draw_overlay(img, cur_frame, start_frame, end_frame, total_frames, caption =''):
     overlayed_frame = draw_playbar(img, cur_frame, start_frame, end_frame, total_frames)
     overlayed_frame = draw_timer(overlayed_frame, cur_frame, total_frames)
+    if caption != '':
+        overlayed_frame = draw_caption(img, caption)
     return overlayed_frame
 
 def display_video_capture(video_file_path, capture_dir=''):
@@ -127,9 +151,9 @@ def display_video_capture(video_file_path, capture_dir=''):
                     frame_pos += 1  #always show from frame 2
                     frame_buffer.append((frame_pos, cur_frame_img))
             if ret:
-                # Show the frame
-                overlayed_frame = draw_overlay(cur_frame_img, frame_pos, start_frame, end_frame, total_frames)
-                cv2.imshow(video_filename, cur_frame_img)
+                # Show the frame with overlay
+                overlayed_frame = draw_overlay(cur_frame_img.copy(), frame_pos+inbuffer_index, start_frame, end_frame, total_frames)
+                cv2.imshow(video_filename, overlayed_frame)
                 
 
                 # Monitor keyboard input
