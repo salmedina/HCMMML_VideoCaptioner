@@ -49,7 +49,7 @@ def print_manual():
     
     N      - Step backwards
     M      - Step forward
-    .      - Capture frame
+    .      - Annotate
     X      - Start point @ current frame
     C      - End point   @ current frame
     S      - Start point @ first frame
@@ -76,25 +76,70 @@ def get_total_frames(video_file_path):
     
     return total_frames
 
+VA_COLOR_WHITE = (230, 230, 230)
+VA_COLOR_LIGHT_GRAY = (128, 128, 128)
+VA_COLOR_LIGHT_GREEN = (128, 255, 128)
+VA_COLOR_DARK_GREEN = (64, 128, 64)
+VA_COLOR_YELLOW = (21, 232, 232)
+VA_COLOR_RED = (39,45,229)
+VA_COLOR_DARK_RED = (23,18,128)
+
 def draw_playbar(img, cur_frame_pos, start_frame, end_frame, total_frames):
     img_height, img_width, img_channels = img.shape
 
     # Playbar Constants
-    playbar_height = 10
-    played_color = (255, 255, 255)
-    not_played_color = (128, 128, 128)
-    in_played_color = (128, 255, 128)
-    in_not_played_color = (64, 128, 64)
+    playbar_height = 5
+    played_color = VA_COLOR_WHITE
+    in_played_color = VA_COLOR_RED
+    in_not_played_color = VA_COLOR_DARK_RED
+    not_played_color = VA_COLOR_LIGHT_GRAY
+    
     
     if cur_frame_pos > 0:
+        # Calculate positions
         cur_pos = int(float(cur_frame_pos)/float(total_frames) * img_width)
-        # First draw the played area (highlighted)
-        cv2.rectangle(img, (0,img_height-playbar_height), (cur_pos, img_height), played_color, -1)
-        # Then the unplayed color
-        cv2.rectangle(img, (cur_pos+1,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
+        start_pos = cur_pos
+        end_pos = cur_pos
+        if start_frame != -1:
+            start_pos = int(float(start_frame)/float(total_frames) * img_width)
+        if end_frame != -1:
+            end_pos = int(float(end_frame)/float(total_frames) * img_width)
+        
+        
+        if start_pos < end_pos:
+            # IN and OUT positions have been set
+            # there are 3 cases:
+            
+            if cur_pos < start_pos: # Case A: cur_pos < start_pos
+                # 1. Draw PLAYED bar                
+                cv2.rectangle(img, (0,img_height-playbar_height), (cur_pos, img_height), played_color, -1)
+                # 2. Draw NOT PLAYED bar
+                cv2.rectangle(img, (cur_pos,img_height-playbar_height), (start_pos, img_height), not_played_color, -1)
+                cv2.rectangle(img, (start_pos,img_height-playbar_height), (end_pos, img_height), in_not_played_color, -1)
+                cv2.rectangle(img, (end_pos,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
+            elif cur_pos < end_pos: # Case B:  start_pos < cur_pos < end_pos
+                # 1. Draw PLAYED bar
+                cv2.rectangle(img, (0,img_height-playbar_height), (start_pos, img_height), played_color, -1)
+                cv2.rectangle(img, (start_pos,img_height-playbar_height), (cur_pos, img_height), in_played_color, -1)
+                # 2. Draw NOT PLAYED bar
+                cv2.rectangle(img, (cur_pos,img_height-playbar_height), (end_pos, img_height), in_not_played_color, -1)
+                cv2.rectangle(img, (end_pos,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
+            else: # Case C:  end_pos < cur_pos
+                # 1. Draw PLAYED bar
+                cv2.rectangle(img, (0,img_height-playbar_height), (start_pos, img_height), played_color, -1)
+                cv2.rectangle(img, (start_pos,img_height-playbar_height), (end_pos, img_height), in_played_color, -1)
+                cv2.rectangle(img, (end_pos,img_height-playbar_height), (cur_pos, img_height), played_color, -1)
+                # 2. Draw NOT PLAYED bar
+                cv2.rectangle(img, (cur_pos,img_height-playbar_height), (img_width, img_height), not_played_color, -1)                
+            
+        else:
+            # 1. Draw PLAYED bar
+            cv2.rectangle(img, (0,img_height-playbar_height), (cur_pos, img_height), played_color, -1)
+            # 2. Draw NOT PLAYED bar
+            cv2.rectangle(img, (cur_pos+1,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
     else:
+        
         cv2.rectangle(img, (0,img_height-playbar_height), (img_width, img_height), not_played_color, -1)
-    
     
     return img
 
@@ -102,13 +147,13 @@ def draw_timer(img, cur_frame_pos, total_frames):
     img_height, img_width, img_channels = img.shape
     timer_text = "%d/%d"%(cur_frame_pos, total_frames)
     timer_pos = (img_width - 100,20)
-    timer_color = (255,255,255)
+    timer_color = VA_COLOR_WHITE
     cv2.putText(img, timer_text, timer_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, timer_color)
     return img
 
 def draw_caption(img, caption):
     img_height, img_width, img_channels = img.shape
-    caption_color = (21, 232, 232)
+    caption_color = VA_COLOR_YELLOW
     caption_pos = (10, img_height-30)
     cv2.putText(img, caption, caption_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, caption_color)
     return img
@@ -126,8 +171,8 @@ def display_video_capture(video_file_path, capture_dir='', caption=''):
     captured_frame = False
     skipped = False
     exit = False
-    start_frame = 0
-    end_frame = 0
+    start_frame = -1
+    end_frame = -1
     total_frames = get_total_frames(video_file_path)
     frame_pos = 0
     video_filename = os.path.basename(os.path.splitext(video_file_path)[0])
@@ -198,7 +243,7 @@ def display_video_capture(video_file_path, capture_dir='', caption=''):
                         end_frame = start_frame
                     print 'IN: %d     OUT: %d'%(start_frame, end_frame)
                 
-                elif key == ord('s') or key == ord('S'):    # Set START point
+                elif key == ord('s') or key == ord('S'):    # Set START point at begininng of video
                     start_frame = 1
                     if end_frame < start_frame:
                         end_frame = start_frame
@@ -210,7 +255,7 @@ def display_video_capture(video_file_path, capture_dir='', caption=''):
                         start_frame = end_frame
                     print 'IN: %d     OUT: %d'%(start_frame, end_frame)
                 
-                elif key == ord('f') or key == ord('F'):    # Set STOP point
+                elif key == ord('f') or key == ord('F'):    # Set STOP point at end of video
                     end_frame = last_frame
                     if start_frame > end_frame:
                         start_frame = end_frame
