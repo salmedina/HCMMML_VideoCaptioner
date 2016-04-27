@@ -10,7 +10,8 @@ from os.path import basename, dirname, join, splitext
 import pickle as pkl
 import pdb
 import MySQLdb as sql
-
+import numpy as np
+import subprocess as sp
 VIDEO_FPS = 30
 
 class NTSettings:
@@ -32,8 +33,20 @@ def build_video_path(base_path, video_name):
     movie_name = re.search(r'(.*)_DVS\d*.avi', video_name).group(1)
     return os.path.join(base_path, movie_name,'video',video_name)
 
+def get_total_frames(video_file_path):
+    video_capture = cv2.VideoCapture(video_file_path)
+    ret, cur_frame = video_capture.read()
+    total_frames = 0
+    while ret:
+        total_frames += 1
+        ret, cur_frame = video_capture.read()
+        if not ret:
+            break
+    return total_frames
+
+    
 def sample_frames(video_filepath, start_frame, end_frame, output_path, \
-                  sample_rate, frame_height, frame_width):
+                  sample_rate, frame_height, frame_width, num_frames):
     '''Returns the list of extracted frames file paths'''
     
     #Initialize the video capture
@@ -42,7 +55,7 @@ def sample_frames(video_filepath, start_frame, end_frame, output_path, \
     if not ret:
         print 'ERROR, could not open video file'
         return
-    frame_pos = 1
+    frame_pos = 0
     
     #Break-down the video path
     video_dir = dirname(video_filepath)
@@ -51,9 +64,18 @@ def sample_frames(video_filepath, start_frame, end_frame, output_path, \
     
     #Calculate the frame positions which will be extracted
     # FrameRate/SampleRate = Frames/s / NumSample/s = Frames/NumSamples = FrameSpan
-    extract_pos = range(start_frame, end_frame, int(VIDEO_FPS/sample_rate))
+    step_size = int(np.ceil((end_frame-start_frame-1)/num_frames))
+    extract_pos = []
+    sum_frames = start_frame
+    for count in range(num_frames):
+        extract_pos += [sum_frames]
+        sum_frames += step_size
     captured_img_ext = '.png'
     captured_img_list = []
+
+    print len(extract_pos)
+    if (len(extract_pos) !=10):
+        pdb.set_trace()
     
     #Scan all the frames
     while frame_pos < end_frame or ret:
@@ -62,9 +84,13 @@ def sample_frames(video_filepath, start_frame, end_frame, output_path, \
         #And capture only the ones we care of
         if frame_pos in extract_pos:
             tmp_img_capture_path = join(output_path,'%s_%05d%s'%(video_name, frame_pos, captured_img_ext))
-            cv2.imwrite(tmp_img_capture_path, cv2.resize(cur_frame, (frame_width, frame_height)))
+            try:
+                cv2.imwrite(tmp_img_capture_path, cv2.resize(cur_frame, (frame_width, frame_height)))
+            except:
+                pdb.set_trace()
             captured_img_list.append(tmp_img_capture_path)
-    
+
+            
     return captured_img_list
 
 def extract_frames(file_list, output_dir, sample_rate, frame_height, frame_width, num_frames, base_path):
@@ -75,25 +101,44 @@ def extract_frames(file_list, output_dir, sample_rate, frame_height, frame_width
     cursor = db.cursor()
 
     img_caption_list = []
+    sum_count = 0
+    count = 0
     for movie in file_list:
-        sq1 = "select text, video_name, video_path from captions where movie = \'%s\'" %(movie)
+        sq1 = "select count(*) from captions where movie = \'%s\'" %(movie)
         cursor.execute(sq1)
         tuples = cursor.fetchall()
-        for tup in tuples:
+        print tuples
+        sq1 = "select text, video_name, video_path,id from captions where movie = \'%s\'" %(movie)
+        cursor.execute(sq1)
+        tuples = cursor.fetchall()
+        print movie
+        sum_count += count
+        for count,tup in zip(range(len(tuples)),tuples):
+            print count+sum_count
             caption = tup[0]
             video_filename = tup[1]
             video_path = os.path.join(base_path,tup[2])
             start_frame = 1
-            pdb.set_trace()
+
             ## for end_frame we need to find that from allvideos table
-            #sq2 = "select length from allvideos where video_name = \'%s\'" %(video_filename)
-        
+#            sq2 = "select id from captions where text = \'%s\'" %(caption)
+#            cursor.execute(sq2)
+#            caption_id = cursor.fetchall()
+            caption_id = int(tup[3])
+            end_frame = get_total_frames(video_path)
             captured_frames_list = sample_frames(video_path, int(start_frame), int(end_frame), output_dir, \
-                                                 sample_rate, frame_height, frame_width)
+                                                 sample_rate, frame_height, frame_width, num_frames)
             #TODO: fix this memory bloat
             n_captions = [caption]*len(captured_frames_list)
-            img_caption_list += zip(captured_frames_list, n_captions)
-        
+            n_caption_id = [caption_id]*len(captured_frames_list)
+            img_caption_list += zip(captured_frames_list, n_captions, n_caption_id)
+
+            comm = 'ls %s_* | wc -l' %(os.path.join(output_dir,video_filename))
+            num_files_written = int(sp.check_output(['bash','-c',comm]))
+            if (num_files_written != 10):
+                pdb.set_trace()
+
+            
     return img_caption_list
     
 def export_to_neuraltalk(extraction_list, output_file):
@@ -110,7 +155,8 @@ if __name__=='__main__':
     split_list = pkl.load(open('split_list.p','rb'))
     settings = NTSettings()
     settings.file_list = split_list[0] + split_list[1] + split_list[2]
-    settings.output_dir = './KeyFrames'
+#    settings.file_list = settings.file_list[19:]
+    settings.output_dir = './KeyFramesFinal'
     settings.sample_rate = 7
     settings.frame_height = 240
     settings.frame_width = 427
@@ -125,5 +171,5 @@ if __name__=='__main__':
                                      settings.frame_width, \
                                      settings.num_frames, \
                                      settings.base_path)
-    
+    pkl.dump(extraction_list,open('mixed.p','wb'))
     export_to_neuraltalk(extraction_list, settings.output_file)
