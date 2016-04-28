@@ -144,10 +144,13 @@ def extract_frames(file_list, output_dir, sample_rate, frame_height, frame_width
 def export_to_neuraltalk(extraction_list, output_file):
     '''Converts the extraction to NeuralTalk import JSON file '''
     
-    export_dict = {}
-    for image, caption in extraction_list:
-        
-        export_dict[image] = caption
+    export_dict = []
+    frame = 0
+    for image, caption, caption_id in extraction_list:
+        frame = frame%10
+        export_dict += [{'file_path':image,'captions':[caption],'id':caption_id*100 + frame}]
+        frame +=1
+    pdb.set_trace()
     json.dump(export_dict, open(output_file, 'w'), indent=4)
 
 if __name__=='__main__':
@@ -156,7 +159,7 @@ if __name__=='__main__':
     settings = NTSettings()
     settings.file_list = split_list[0] + split_list[1] + split_list[2]
 #    settings.file_list = settings.file_list[19:]
-    settings.output_dir = './KeyFramesFinal'
+    settings.output_dir = './KeyFrames'
     settings.sample_rate = 7
     settings.frame_height = 240
     settings.frame_width = 427
@@ -164,12 +167,13 @@ if __name__=='__main__':
     settings.output_file = 'mixed.json'
     settings.base_path = '/multicomp/datasets/'
     #extraction list 
-    extraction_list = extract_frames(settings.file_list, \
-                                     settings.output_dir, \
-                                     settings.sample_rate, \
-                                     settings.frame_height,\
-                                     settings.frame_width, \
-                                     settings.num_frames, \
-                                     settings.base_path)
-    pkl.dump(extraction_list,open('mixed.p','wb'))
+    # extraction_list = extract_frames(settings.file_list, \
+    #                                  settings.output_dir, \
+    #                                  settings.sample_rate, \
+    #                                  settings.frame_height,\
+    #                                  settings.frame_width, \
+    #                                  settings.num_frames, \
+    #                                  settings.base_path)
+    #pkl.dump(extraction_list,open('mixed.p','wb'))
+    extraction_list = pkl.load(open('mixed.p','rb'))
     export_to_neuraltalk(extraction_list, settings.output_file)
